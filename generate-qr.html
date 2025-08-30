@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de QR Code - Sleep Help</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        input[type="url"] {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #qrcode {
+            margin: 30px auto;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            display: inline-block;
+        }
+        .download-btn {
+            background: #28a745;
+            margin-top: 20px;
+        }
+        .download-btn:hover {
+            background: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔗 Gerador de QR Code - Sleep Help</h1>
+    <p>Gere um QR code personalizado para os visitantes da exposição acessarem seu projeto!</p>
+    
+    <div class="input-group">
+        <label for="url">URL do seu projeto na Azure:</label><br>
+        <input type="url" id="url" placeholder="https://seu-app.azurestaticapps.net" value="https://">
+    </div>
+    
+    <button onclick="generateQR()">🔄 Gerar QR Code</button>
+    <button onclick="downloadQR()" class="download-btn" id="downloadBtn" style="display: none;">⬇️ Baixar QR Code</button>
+    
+    <div id="qrcode"></div>
+    
+    <div id="instructions" style="display: none; margin-top: 30px; text-align: left; background: #f8f9fa; padding: 20px; border-radius: 10px;">
+        <h3>📋 Instruções para Impressão:</h3>
+        <ol>
+            <li>Clique em "Baixar QR Code" para salvar a imagem</li>
+            <li>Imprima em papel de qualidade (recomendado: 300 DPI)</li>
+            <li>Tamanho recomendado: 10x10 cm para fácil leitura</li>
+            <li>Cole em um local visível na exposição</li>
+            <li>Teste o QR code antes da exposição!</li>
+        </ol>
+        
+        <h3>💡 Dicas para a Exposição:</h3>
+        <ul>
+            <li>Coloque o QR code em uma altura confortável para leitura</li>
+            <li>Adicione instruções: "Escaneie para acessar o projeto"</li>
+            <li>Tenha um dispositivo de demonstração funcionando</li>
+            <li>Prepare uma versão offline caso haja problemas de internet</li>
+        </ul>
+    </div>
+
+    <script>
+        function generateQR() {
+            const url = document.getElementById('url').value;
+            if (!url) {
+                alert('Por favor, insira uma URL válida!');
+                return;
+            }
+            
+            const qrcodeDiv = document.getElementById('qrcode');
+            qrcodeDiv.innerHTML = '';
+            
+            QRCode.toCanvas(qrcodeDiv, url, {
+                width: 300,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            }, function (error) {
+                if (error) {
+                    alert('Erro ao gerar QR code: ' + error);
+                } else {
+                    document.getElementById('downloadBtn').style.display = 'inline-block';
+                    document.getElementById('instructions').style.display = 'block';
+                }
+            });
+        }
+        
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) return;
+            
+            const link = document.createElement('a');
+            link.download = 'sleep-help-qrcode.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Gerar QR code automaticamente se houver uma URL padrão
+        window.onload = function() {
+            if (document.getElementById('url').value && document.getElementById('url').value !== 'https://') {
+                generateQR();
+            }
+        };
+    </script>
+</body>
+</html>
