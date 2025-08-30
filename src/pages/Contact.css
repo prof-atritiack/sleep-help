@@ -1,0 +1,441 @@
+.contact-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.contact-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 30px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(26, 26, 26, 0.8));
+  border-radius: 20px;
+  border: 2px solid var(--primary-yellow);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.contact-header h1 {
+  color: var(--primary-yellow);
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.contact-header p {
+  color: var(--text-gray);
+  font-size: 1.1rem;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+/* Formulário de Contato */
+.contact-form-section {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--primary-yellow);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  grid-column: 1 / -1;
+}
+
+.contact-form-section h3 {
+  color: var(--primary-yellow);
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  text-align: center;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: var(--text-white);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-input,
+.form-textarea {
+  padding: 12px;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-white);
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary-yellow);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--text-gray);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.submit-btn {
+  padding: 15px 30px;
+  background: linear-gradient(135deg, var(--primary-yellow), var(--secondary-yellow));
+  color: var(--primary-black);
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  align-self: center;
+}
+
+.submit-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+}
+
+/* Mensagem de Sucesso */
+.success-message {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.success-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.success-message h4 {
+  color: var(--success-green);
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.success-message p {
+  color: var(--text-gray);
+  margin-bottom: 25px;
+}
+
+.reset-btn {
+  padding: 12px 24px;
+  background: transparent;
+  border: 2px solid var(--primary-yellow);
+  color: var(--primary-yellow);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.reset-btn:hover {
+  background: var(--primary-yellow);
+  color: var(--primary-black);
+  transform: translateY(-2px);
+}
+
+/* Seção de Emergência */
+.emergency-section {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--danger-red);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.emergency-section h3 {
+  color: var(--danger-red);
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  text-align: center;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+.emergency-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.emergency-contact {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(255, 68, 68, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+.emergency-icon {
+  font-size: 2rem;
+}
+
+.emergency-info {
+  flex: 1;
+}
+
+.emergency-info h4 {
+  color: var(--text-white);
+  margin-bottom: 5px;
+  font-size: 1.1rem;
+}
+
+.emergency-number {
+  color: var(--danger-red);
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.emergency-description {
+  color: var(--text-gray);
+  font-size: 0.9rem;
+}
+
+.call-btn {
+  padding: 8px 16px;
+  background: var(--danger-red);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.call-btn:hover {
+  background: #cc0000;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
+}
+
+/* Seção de Suporte */
+.support-section {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--primary-yellow);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.support-section h3 {
+  color: var(--primary-yellow);
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  text-align: center;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+.support-channels {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.support-channel {
+  display: flex;
+  gap: 15px;
+  padding: 20px;
+  background: rgba(255, 215, 0, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.channel-icon {
+  font-size: 2.5rem;
+}
+
+.channel-info h4 {
+  color: var(--primary-yellow);
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+.channel-info p {
+  color: var(--text-gray);
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+.channel-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contact-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.contact-label {
+  color: var(--text-gray);
+  font-weight: 500;
+  font-size: 0.9rem;
+  min-width: 80px;
+}
+
+.contact-link {
+  color: var(--primary-yellow);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.contact-link:hover {
+  color: var(--secondary-yellow);
+  text-decoration: underline;
+}
+
+/* Seção de Informações */
+.info-section {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid var(--primary-yellow);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  grid-column: 1 / -1;
+}
+
+.info-section h3 {
+  color: var(--primary-yellow);
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  text-align: center;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.info-item {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-item h4 {
+  color: var(--primary-yellow);
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.info-item p {
+  color: var(--text-gray);
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.info-item strong {
+  color: var(--text-white);
+}
+
+.info-link {
+  color: var(--primary-yellow);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.info-link:hover {
+  color: var(--secondary-yellow);
+  text-decoration: underline;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .contact-container {
+    padding: 15px;
+  }
+
+  .contact-header h1 {
+    font-size: 2rem;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .emergency-contact {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .support-channel {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-header {
+    padding: 20px 15px;
+  }
+
+  .contact-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .contact-form-section,
+  .emergency-section,
+  .support-section,
+  .info-section {
+    padding: 20px 15px;
+  }
+
+  .submit-btn {
+    padding: 12px 24px;
+    font-size: 1rem;
+  }
+}
+
