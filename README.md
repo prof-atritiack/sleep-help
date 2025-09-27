@@ -1,6 +1,6 @@
 # Sleep Help - Monitoramento de Saúde
 
-Interface web para monitoramento de SpO2 (Saturação de Oxigênio) e BPM (Batimentos por Minuto) durante o sono.
+Interface web para monitoramento de SpO2 (Saturação de Oxigênio) durante o sono.
 
 ## 📋 Sobre o Projeto
 
@@ -10,7 +10,7 @@ O projeto visa fornecer uma interface web intuitiva para acompanhar parâmetros 
 
 ## 🎯 Objetivos
 
-- Monitorar SpO2 e BPM em tempo real durante o sono
+- Monitorar SpO2 em tempo real durante o sono
 - Fornecer interface web responsiva e acessível
 - Armazenar histórico de medições para análise
 - Alertar sobre possíveis anormalidades nos parâmetros vitais
@@ -18,7 +18,7 @@ O projeto visa fornecer uma interface web intuitiva para acompanhar parâmetros 
 
 ## 🚀 Funcionalidades
 
-- **Monitoramento em Tempo Real**: Acompanhamento contínuo de SpO2 e BPM
+- **Monitoramento em Tempo Real**: Acompanhamento contínuo de SpO2
 - **Dashboard Interativo**: Visualização de dados através de gráficos e indicadores
 - **Histórico de Medições**: Armazenamento e consulta de dados históricos
 - **Sistema de Autenticação**: Controle de acesso e segurança dos dados
@@ -36,7 +36,6 @@ O projeto visa fornecer uma interface web intuitiva para acompanhar parâmetros 
 - **Hardware**: Módulo **ESP32 DevKit V1** como controlador principal
 - **Sensores**: 
   - Sensor de SpO2 (oxímetro de pulso)
-  - Sensor de frequência cardíaca (BPM)
 - **Comunicação**: Wi-Fi para envio de dados para a interface web
 - **Processamento**: Análise local dos dados antes do envio
 

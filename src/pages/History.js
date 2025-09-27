@@ -13,8 +13,6 @@ const History = () => {
     dateTo: '',
     spo2Min: '',
     spo2Max: '',
-    bpmMin: '',
-    bpmMax: '',
     status: 'all'
   });
 
@@ -35,13 +33,11 @@ const History = () => {
     for (let i = 0; i < 50; i++) {
       const date = new Date(now.getTime() - (i * 2 * 60 * 60 * 1000)); // 2 horas atrás
       const spo2 = Math.floor(Math.random() * 6) + 95; // 95-100
-      const bpm = Math.floor(Math.random() * 20) + 65; // 65-85
       
       mockData.push({
         id: i + 1,
         timestamp: date,
         spo2,
-        bpm,
         status: spo2 < 95 ? 'baixa-saturacao' : 'normal',
         notes: spo2 < 95 ? 'Atenção: Saturação baixa' : 'Valores normais'
       });
@@ -80,13 +76,6 @@ const History = () => {
       filtered = filtered.filter(reading => reading.spo2 <= parseInt(filters.spo2Max));
     }
 
-    if (filters.bpmMin) {
-      filtered = filtered.filter(reading => reading.bpm >= parseInt(filters.bpmMin));
-    }
-
-    if (filters.bpmMax) {
-      filtered = filtered.filter(reading => reading.bpm <= parseInt(filters.bpmMax));
-    }
 
     if (filters.status !== 'all') {
       filtered = filtered.filter(reading => reading.status === filters.status);
@@ -101,8 +90,6 @@ const History = () => {
       dateTo: '',
       spo2Min: '',
       spo2Max: '',
-      bpmMin: '',
-      bpmMax: '',
       status: 'all'
     });
     setFilteredReadings(readings);
@@ -110,12 +97,11 @@ const History = () => {
 
   const exportData = () => {
     const csvContent = [
-      ['ID', 'Data/Hora', 'SpO2 (%)', 'BPM', 'Status', 'Observações'],
+      ['ID', 'Data/Hora', 'SpO2 (%)', 'Status', 'Observações'],
       ...filteredReadings.map(reading => [
         reading.id,
         reading.timestamp.toLocaleString('pt-BR'),
         reading.spo2,
-        reading.bpm,
         reading.status === 'baixa-saturacao' ? 'Baixa Saturação' : 'Normal',
         reading.notes
       ])
@@ -204,33 +190,6 @@ const History = () => {
             />
           </div>
 
-          <div className="filter-group">
-            <label>BPM Mínimo:</label>
-            <input
-              type="number"
-              name="bpmMin"
-              value={filters.bpmMin}
-              onChange={handleFilterChange}
-              placeholder="60"
-              min="0"
-              max="200"
-              className="filter-input"
-            />
-          </div>
-
-          <div className="filter-group">
-            <label>BPM Máximo:</label>
-            <input
-              type="number"
-              name="bpmMax"
-              value={filters.bpmMax}
-              onChange={handleFilterChange}
-              placeholder="100"
-              min="0"
-              max="200"
-              className="filter-input"
-            />
-          </div>
 
           <div className="filter-group">
             <label>Status:</label>
@@ -276,15 +235,6 @@ const History = () => {
           </span>
         </div>
         <div className="stat-card">
-          <h4>BPM Médio</h4>
-          <span className="stat-value">
-            {filteredReadings.length > 0 
-              ? (filteredReadings.reduce((sum, r) => sum + r.bpm, 0) / filteredReadings.length).toFixed(1)
-              : '0'
-            }
-          </span>
-        </div>
-        <div className="stat-card">
           <h4>Alertas</h4>
           <span className="stat-value warning">
             {filteredReadings.filter(r => r.status === 'baixa-saturacao').length}
@@ -302,7 +252,6 @@ const History = () => {
                 <th>ID</th>
                 <th>Data/Hora</th>
                 <th>SpO2 (%)</th>
-                <th>BPM</th>
                 <th>Status</th>
                 <th>Observações</th>
               </tr>
@@ -315,7 +264,6 @@ const History = () => {
                   <td className={reading.spo2 < 95 ? 'warning-value' : ''}>
                     {reading.spo2}%
                   </td>
-                  <td>{reading.bpm}</td>
                   <td>{getStatusBadge(reading.status)}</td>
                   <td>{reading.notes}</td>
                 </tr>

@@ -129,7 +129,7 @@ const Login = () => {
         <div className="healthcare-info">
           <div className="healthcare-icon">🏥</div>
           <p>Sistema de Monitoramento de Saúde</p>
-          <p>SpO2 • BPM • Alertas Inteligentes</p>
+          <p>SpO2 • Monitoramento Inteligente</p>
         </div>
       </div>
     </div>

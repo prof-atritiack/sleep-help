@@ -2,17 +2,17 @@
 
 ## 🎯 Visão Geral
 
-Este documento descreve como o ESP32 deve enviar dados de sensores (SpO2 e BPM) para a aplicação Sleep Help.
+Este documento descreve como o ESP32 deve enviar dados de sensores (SpO2) para a aplicação Sleep Help.
 
 ## 🔌 Configuração da Rede
 
 ### IP do Servidor
-- **Desenvolvimento**: `http://10.10.14.223:3001` (IP da sua máquina na rede)
+- **Desenvolvimento**: `http://172.20.10.7:3001` (IP da sua máquina na rede)
 - **Produção**: `http://[IP_DO_SERVIDOR]:3001`
 
 ### Endpoint Principal
 ```
-POST http://10.10.14.223:3001/api/sensor-data
+POST http://172.20.10.7:3001/api/sensor-data
 ```
 
 ## 📊 Formato dos Dados
@@ -21,14 +21,12 @@ POST http://10.10.14.223:3001/api/sensor-data
 ```json
 {
   "spo2": 98,
-  "bpm": 72,
   "timestamp": "2025-09-27 10:30:45"
 }
 ```
 
 ### Campos Obrigatórios
 - **`spo2`** (integer): Saturação de oxigênio (0-100%)
-- **`bpm`** (integer): Batimentos por minuto (30-200)
 - **`timestamp`** (string, opcional): Data/hora no formato "YYYY-MM-DD HH:mm:ss"
 
 ## 🔧 Código ESP32 (Arduino)
@@ -44,12 +42,12 @@ POST http://10.10.14.223:3001/api/sensor-data
 ```cpp
 const char* ssid = "academico.street.br";  // Nome da sua rede
 const char* password = "sua_senha";        // Senha da rede
-const char* serverURL = "http://10.10.14.223:3001/api/sensor-data";
+const char* serverURL = "http://172.20.10.7:3001/api/sensor-data";
 ```
 
 ### Função para Enviar Dados
 ```cpp
-void sendSensorData(int spo2, int bpm) {
+void sendSensorData(int spo2) {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     http.begin(serverURL);
@@ -58,7 +56,6 @@ void sendSensorData(int spo2, int bpm) {
     // Criar JSON
     String jsonData = "{";
     jsonData += "\"spo2\":" + String(spo2) + ",";
-    jsonData += "\"bpm\":" + String(bpm) + ",";
     jsonData += "\"timestamp\":\"" + getCurrentTime() + "\"";
     jsonData += "}";
     
@@ -93,12 +90,11 @@ String getCurrentTime() {
 void loop() {
   // Ler sensores
   int spo2Value = readSpO2Sensor();
-  int bpmValue = readBPMSensor();
   
   // Enviar dados a cada 5 segundos
   static unsigned long lastSend = 0;
   if (millis() - lastSend >= 5000) {
-    sendSensorData(spo2Value, bpmValue);
+    sendSensorData(spo2Value);
     lastSend = millis();
   }
   
@@ -116,11 +112,10 @@ void loop() {
 // Configurações de rede
 const char* ssid = "academico.street.br";
 const char* password = "sua_senha";
-const char* serverURL = "http://10.10.14.223:3001/api/sensor-data";
+const char* serverURL = "http://172.20.10.7:3001/api/sensor-data";
 
 // Pinos dos sensores (ajustar conforme hardware)
 #define SPO2_PIN A0
-#define BPM_PIN A1
 
 void setup() {
   Serial.begin(115200);
@@ -138,19 +133,17 @@ void setup() {
 void loop() {
   // Simular leitura de sensores
   int spo2 = analogRead(SPO2_PIN);
-  int bpm = analogRead(BPM_PIN);
   
   // Converter valores analógicos para valores reais
   spo2 = map(spo2, 0, 4095, 90, 100);  // 90-100%
-  bpm = map(bpm, 0, 4095, 60, 100);    // 60-100 bpm
   
   // Enviar dados
-  sendSensorData(spo2, bpm);
+  sendSensorData(spo2);
   
   delay(5000); // Enviar a cada 5 segundos
 }
 
-void sendSensorData(int spo2, int bpm) {
+void sendSensorData(int spo2) {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     http.begin(serverURL);
@@ -159,7 +152,6 @@ void sendSensorData(int spo2, int bpm) {
     // Criar JSON
     DynamicJsonDocument doc(1024);
     doc["spo2"] = spo2;
-    doc["bpm"] = bpm;
     doc["timestamp"] = getCurrentTime();
     
     String jsonString;
@@ -189,20 +181,19 @@ String getCurrentTime() {
 
 ### 1. Teste com cURL
 ```bash
-curl -X POST http://10.10.14.223:3001/api/sensor-data \
+curl -X POST http://172.20.10.7:3001/api/sensor-data \
   -H "Content-Type: application/json" \
-  -d '{"spo2":98,"bpm":72,"timestamp":"2025-09-27 10:30:45"}'
+  -d '{"spo2":98,"timestamp":"2025-09-27 10:30:45"}'
 ```
 
 ### 2. Teste com Postman
 - **Método**: POST
-- **URL**: `http://10.10.14.223:3001/api/sensor-data`
+- **URL**: `http://172.20.10.7:3001/api/sensor-data`
 - **Headers**: `Content-Type: application/json`
 - **Body**:
 ```json
 {
   "spo2": 98,
-  "bpm": 72,
   "timestamp": "2025-09-27 10:30:45"
 }
 ```
@@ -216,7 +207,6 @@ curl -X POST http://10.10.14.223:3001/api/sensor-data \
   "message": "Dados recebidos com sucesso",
   "data": {
     "spo2": 98,
-    "bpm": 72,
     "timestamp": "2025-09-27 10:30:45",
     "unix": 1695812445000
   }
@@ -226,7 +216,7 @@ curl -X POST http://10.10.14.223:3001/api/sensor-data \
 ### Erro (400)
 ```json
 {
-  "error": "Dados inválidos. SpO2 e BPM são obrigatórios."
+  "error": "Dados inválidos. SpO2 é obrigatório."
 }
 ```
 
@@ -258,10 +248,6 @@ GET /api/status
 - **Faixa válida**: 0-100%
 - **Alerta**: < 95% (baixa saturação)
 
-### BPM
-- **Faixa válida**: 30-200 bpm
-- **Normal**: 60-100 bpm
-- **Alerta**: < 60 ou > 100 bpm
 
 ## 🔄 Comunicação em Tempo Real
 
@@ -300,7 +286,7 @@ Serial.println("IP: " + WiFi.localIP().toString());
 Serial.println("RSSI: " + String(WiFi.RSSI()));
 
 // No backend (console)
-📊 Dados recebidos: SpO2=98%, BPM=72
+📊 Dados recebidos: SpO2=98%
 🔌 Cliente conectado via WebSocket
 ```
 
@@ -308,7 +294,7 @@ Serial.println("RSSI: " + String(WiFi.RSSI()));
 
 A aplicação web mostrará:
 - ✅ **Status de conexão** com o ESP32
-- 📊 **Dados em tempo real** (SpO2 e BPM)
+- 📊 **Dados em tempo real** (SpO2)
 - 🚨 **Alertas automáticos** para valores anormais
 - 📈 **Histórico de medições**
 

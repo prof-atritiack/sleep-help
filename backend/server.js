@@ -22,7 +22,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Armazenamento em memória (em produção, usar banco de dados)
 let sensorData = {
   spo2: [],
-  bpm: [],
   lastUpdate: null
 };
 
@@ -31,7 +30,6 @@ const generateSampleData = () => {
   const now = moment();
   return {
     spo2: Math.floor(Math.random() * 10) + 90, // 90-100%
-    bpm: Math.floor(Math.random() * 40) + 60,  // 60-100 bpm
     timestamp: now.format('YYYY-MM-DD HH:mm:ss'),
     unix: now.valueOf()
   };
@@ -40,38 +38,35 @@ const generateSampleData = () => {
 // Endpoint para receber dados do ESP32
 app.post('/api/sensor-data', (req, res) => {
   try {
-    const { spo2, bpm, timestamp } = req.body;
+    const { spo2, timestamp } = req.body;
     
     // Validar dados
-    if (spo2 === undefined || bpm === undefined) {
+    if (spo2 === undefined) {
       return res.status(400).json({ 
-        error: 'Dados inválidos. SpO2 e BPM são obrigatórios.' 
+        error: 'Dados inválidos. SpO2 é obrigatório.' 
       });
     }
 
     // Criar registro de dados
     const dataPoint = {
       spo2: parseInt(spo2),
-      bpm: parseInt(bpm),
       timestamp: timestamp || moment().format('YYYY-MM-DD HH:mm:ss'),
       unix: moment().valueOf()
     };
 
     // Armazenar dados (manter apenas últimos 1000 registros)
     sensorData.spo2.push(dataPoint.spo2);
-    sensorData.bpm.push(dataPoint.bpm);
     sensorData.lastUpdate = dataPoint;
 
     // Limitar histórico
     if (sensorData.spo2.length > 1000) {
       sensorData.spo2 = sensorData.spo2.slice(-1000);
-      sensorData.bpm = sensorData.bpm.slice(-1000);
     }
 
     // Enviar dados em tempo real via WebSocket
     io.emit('sensorData', dataPoint);
 
-    console.log(`📊 Dados recebidos: SpO2=${dataPoint.spo2}%, BPM=${dataPoint.bpm}`);
+    console.log(`📊 Dados recebidos: SpO2=${dataPoint.spo2}%`);
 
     res.json({ 
       success: true, 
@@ -93,7 +88,6 @@ app.get('/api/sensor-data', (req, res) => {
   
   const historicalData = {
     spo2: sensorData.spo2.slice(-limit),
-    bpm: sensorData.bpm.slice(-limit),
     lastUpdate: sensorData.lastUpdate,
     count: sensorData.spo2.length
   };
@@ -139,11 +133,10 @@ setInterval(() => {
   if (sensorData.spo2.length === 0) {
     const sampleData = generateSampleData();
     sensorData.spo2.push(sampleData.spo2);
-    sensorData.bpm.push(sampleData.bpm);
     sensorData.lastUpdate = sampleData;
     
     io.emit('sensorData', sampleData);
-    console.log(`📊 Dados de exemplo: SpO2=${sampleData.spo2}%, BPM=${sampleData.bpm}`);
+    console.log(`📊 Dados de exemplo: SpO2=${sampleData.spo2}%`);
   }
 }, 5000);
 

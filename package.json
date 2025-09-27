@@ -1,7 +1,7 @@
 {
   "name": "sleep-help",
   "version": "1.0.0",
-  "description": "Interface web para monitoramento de SpO2 e BPM",
+  "description": "Interface web para monitoramento de SpO2",
   "main": "index.js",
   "scripts": {
     "start": "react-scripts start",

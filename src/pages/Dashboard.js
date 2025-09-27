@@ -9,7 +9,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [readings, setReadings] = useState({
     spo2: 0,
-    bpm: 0,
     timestamp: new Date()
   });
   const [monitoringStatus, setMonitoringStatus] = useState('offline');
@@ -44,7 +43,6 @@ const Dashboard = () => {
       console.log('📊 Dados recebidos:', data);
       setReadings({
         spo2: data.spo2,
-        bpm: data.bpm,
         timestamp: new Date(data.unix)
       });
 
@@ -75,7 +73,6 @@ const Dashboard = () => {
       if (data.current) {
         setReadings({
           spo2: data.current.spo2,
-          bpm: data.current.bpm,
           timestamp: new Date(data.current.unix)
         });
         setIsMonitoring(true);
@@ -186,11 +183,6 @@ const Dashboard = () => {
           <h3>Leituras em Tempo Real</h3>
           <div className="readings-grid">
             <div className="reading-item">
-              <div className="reading-icon">💓</div>
-              <div className="reading-value">{readings.bpm}</div>
-          <div className="reading-label">BPM</div>
-            </div>
-            <div className="reading-item">
               <div className="reading-icon">🩸</div>
               <div className="reading-value">{readings.spo2}%</div>
               <div className="reading-label">SpO2</div>
@@ -245,7 +237,7 @@ const Dashboard = () => {
           <div className="trend-chart">
             <div className="chart-placeholder">
               📊 Gráfico de Tendências
-              <p>Visualização das variações de SpO2 e BPM ao longo do tempo</p>
+              <p>Visualização das variações de SpO2 ao longo do tempo</p>
             </div>
           </div>
         </div>
