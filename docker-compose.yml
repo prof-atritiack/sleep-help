@@ -1,12 +1,33 @@
-version: '3.8'
-
 services:
-  sleep-help-app:
-    build: .
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
-      - "0.0.0.0:3000:80"
-    container_name: sleep-help-container
+      - "3001:3001"
+    container_name: sleep-help-backend
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+      - PORT=3001
+    networks:
+      - sleep-help-network
 
+  # Frontend React
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    container_name: sleep-help-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - sleep-help-network
+
+networks:
+  sleep-help-network:
+    driver: bridge
