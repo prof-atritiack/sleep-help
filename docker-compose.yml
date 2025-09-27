@@ -4,8 +4,9 @@ services:
   sleep-help-app:
     build: .
     ports:
-      - "3000:80"
+      - "0.0.0.0:3000:80"
     container_name: sleep-help-container
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+

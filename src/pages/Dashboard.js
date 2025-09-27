@@ -1,48 +1,90 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [readings, setReadings] = useState({
-    spo2: 98,
-    bpm: 72,
+    spo2: 0,
+    bpm: 0,
     timestamp: new Date()
   });
-  const [monitoringStatus, setMonitoringStatus] = useState('normal');
-  const [isMonitoring, setIsMonitoring] = useState(true);
+  const [monitoringStatus, setMonitoringStatus] = useState('offline');
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
+  const [socket, setSocket] = useState(null);
 
+  // Conectar ao WebSocket do backend
   useEffect(() => {
     if (!user) {
       navigate('/');
       return;
     }
 
-    // Simular leituras em tempo real
-    const interval = setInterval(() => {
-      if (isMonitoring) {
-        const newSpo2 = Math.floor(Math.random() * 6) + 95; // 95-100
-        const newBpm = Math.floor(Math.random() * 20) + 65; // 65-85
-        
-        setReadings({
-          spo2: newSpo2,
-          bpm: newBpm,
-          timestamp: new Date()
-        });
+    // Conectar ao backend
+    const newSocket = io('http://localhost:3001');
+    setSocket(newSocket);
 
-        // Atualizar status baseado na saturação
-        if (newSpo2 < 95) {
-          setMonitoringStatus('baixa-saturacao');
-        } else {
-          setMonitoringStatus('normal');
-        }
+    // Eventos do WebSocket
+    newSocket.on('connect', () => {
+      console.log('🔌 Conectado ao backend');
+      setConnectionStatus('connected');
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('🔌 Desconectado do backend');
+      setConnectionStatus('disconnected');
+      setMonitoringStatus('offline');
+    });
+
+    newSocket.on('sensorData', (data) => {
+      console.log('📊 Dados recebidos:', data);
+      setReadings({
+        spo2: data.spo2,
+        bpm: data.bpm,
+        timestamp: new Date(data.unix)
+      });
+
+      // Atualizar status baseado na saturação
+      if (data.spo2 < 95) {
+        setMonitoringStatus('baixa-saturacao');
+      } else if (data.spo2 >= 95) {
+        setMonitoringStatus('normal');
       }
-    }, 3000);
 
-    return () => clearInterval(interval);
-  }, [user, navigate, isMonitoring]);
+      setIsMonitoring(true);
+    });
+
+    // Carregar dados atuais
+    fetchCurrentData();
+
+    return () => {
+      newSocket.close();
+    };
+  }, [user, navigate]);
+
+  // Função para buscar dados atuais
+  const fetchCurrentData = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/current-data');
+      const data = await response.json();
+      
+      if (data.current) {
+        setReadings({
+          spo2: data.current.spo2,
+          bpm: data.current.bpm,
+          timestamp: new Date(data.current.unix)
+        });
+        setIsMonitoring(true);
+        setMonitoringStatus(data.current.spo2 < 95 ? 'baixa-saturacao' : 'normal');
+      }
+    } catch (error) {
+      console.error('❌ Erro ao buscar dados:', error);
+    }
+  };
 
   const handleEmergencyCall = () => {
     if (confirm('Confirmar chamada para o SAMU (192)?')) {
@@ -75,6 +117,8 @@ const Dashboard = () => {
         return 'var(--success-green)';
       case 'pausado':
         return 'var(--warning-orange)';
+      case 'offline':
+        return 'var(--text-gray)';
       default:
         return 'var(--text-gray)';
     }
@@ -88,8 +132,21 @@ const Dashboard = () => {
         return 'Normal';
       case 'pausado':
         return 'Pausado';
+      case 'offline':
+        return 'Offline';
       default:
         return 'Desconhecido';
+    }
+  };
+
+  const getConnectionStatus = () => {
+    switch (connectionStatus) {
+      case 'connected':
+        return '🟢 Conectado';
+      case 'disconnected':
+        return '🔴 Desconectado';
+      default:
+        return '⚪ Desconhecido';
     }
   };
 
@@ -112,9 +169,13 @@ const Dashboard = () => {
             ></div>
             <span className="status-text">{getStatusText()}</span>
           </div>
+          <div className="connection-status">
+            {getConnectionStatus()}
+          </div>
           <button 
             className={`monitoring-toggle ${isMonitoring ? 'active' : ''}`}
             onClick={toggleMonitoring}
+            disabled={connectionStatus === 'disconnected'}
           >
             {isMonitoring ? 'Pausar Monitoramento' : 'Retomar Monitoramento'}
           </button>
