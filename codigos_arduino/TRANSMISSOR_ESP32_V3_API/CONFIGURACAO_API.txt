@@ -1,0 +1,160 @@
+# 🔧 Configuração ESP32 Oximetro + API
+
+## 📋 Pré-requisitos
+- ESP32 DevKit V1
+- Sensor MAX30105 (oxímetro)
+- Display TFT (opcional)
+- Buzzer (opcional)
+- Bibliotecas: MAX30105, TFT_eSPI, WiFi, HTTPClient, ArduinoJson
+
+## ⚙️ Configurações Necessárias
+
+### 1. Credenciais Wi-Fi
+Edite no código:
+```cpp
+const char* ssid = "academico.street.br";  // Seu nome de rede
+const char* password = "sua_senha";        // Sua senha
+```
+
+### 2. IP do Servidor
+Edite no código:
+```cpp
+const char* serverURL = "http://172.20.10.7:3001/api/sensor-data";
+```
+
+### 3. Intervalo de Envio para API
+Edite no código:
+```cpp
+#define INTERVALO_ENVIO 5000  // 5 segundos (em ms)
+```
+
+### 4. MAC do Receptor ESP-NOW
+Edite no código:
+```cpp
+uint8_t broadcastAddress[] = {0xF4, 0x65, 0x0B, 0x57, 0xBF, 0xF8};
+```
+
+## 🚀 Como Usar
+
+1. **Abra o Arduino IDE**
+2. **Carregue o arquivo**: `TRANSMISSOR_ESP32_V3_API.ino`
+3. **Configure as credenciais Wi-Fi**
+4. **Verifique o IP do servidor**
+5. **Conecte o sensor MAX30105**:
+   - VCC → 3.3V
+   - GND → GND
+   - SDA → GPIO 21
+   - SCL → GPIO 22
+6. **Faça upload para o ESP32**
+7. **Abra o Serial Monitor** (115200 baud)
+
+## 📊 O que o Código Faz
+
+### Sensoriamento:
+- ✅ Lê dados do sensor MAX30105
+- ✅ Calcula SpO2 e frequência cardíaca
+- ✅ Detecta se o dedo está no sensor
+- ✅ Valida as medições
+
+### Comunicação:
+- ✅ Envia dados via ESP-NOW para receptor
+- ✅ Envia dados via Wi-Fi para API web
+- ✅ Reconecta automaticamente se Wi-Fi cair
+
+### Interface:
+- ✅ Mostra dados no display TFT
+- ✅ Pisca LED para indicar status
+- ✅ Toca buzzer para alertas
+- ✅ Logs detalhados no Serial Monitor
+
+## 🔍 Monitoramento
+
+### Serial Monitor mostra:
+```
+========================================
+    SLEEP HELP - ESP32 Oximetro
+    Sensor MAX30105 + API + ESP-NOW
+========================================
+Enviando dados para: http://172.20.10.7:3001/api/sensor-data
+========================================
+✅ Wi-Fi conectado!
+IP: 172.20.10.8
+RSSI: -45 dBm
+Valor medio IR: 45000
+Medicao #1 - SpO2: 98%  HR: 72 bpm
+📊 Enviando dados para API...
+   SpO2: 98%
+   Timestamp: 2025-09-27 12:30:45
+✅ Dados enviados para API: {"success":true,"message":"Dados recebidos com sucesso"}
+✅ Saturação normal
+----------------------------------------
+```
+
+### Display TFT mostra:
+- **SpO2**: Valor da saturação de oxigênio
+- **BPM**: Frequência cardíaca
+- **API Status**: Status da conexão com a API
+- **Mensagens**: Instruções para o usuário
+
+### LED indica:
+- **1 piscada**: Dados enviados com sucesso (normal)
+- **3 piscadas**: Alerta de baixa saturação
+- **5 piscadas**: Erro na comunicação
+
+## 🛠️ Personalização
+
+### Alterar intervalo de envio para API:
+```cpp
+#define INTERVALO_ENVIO 3000  // 3 segundos
+```
+
+### Alterar sensibilidade do sensor:
+```cpp
+#define DEDO_THRESHOLD 30000  // Valor IR para detectar dedo
+```
+
+### Alterar pinos:
+```cpp
+#define BUZZER_PIN 4
+#define LED_PIN 2
+```
+
+## 🚨 Solução de Problemas
+
+### Sensor não detecta:
+- Verifique conexões do MAX30105
+- Ajuste o DEDO_THRESHOLD
+- Verifique se o dedo está bem posicionado
+
+### Wi-Fi não conecta:
+- Verifique SSID e senha
+- Verifique sinal da rede
+- Reinicie o ESP32
+
+### Dados não chegam na API:
+- Verifique se o backend está rodando
+- Verifique o IP do servidor
+- Verifique logs do Serial Monitor
+
+### Display não funciona:
+- Verifique conexões do TFT
+- Verifique biblioteca TFT_eSPI
+- Verifique configuração do display
+
+## 📱 Verificar na Aplicação Web
+
+1. Acesse: `http://172.20.10.7:3000`
+2. Faça login
+3. Vá para o Dashboard
+4. Deve mostrar dados de SpO2 em tempo real!
+
+## 🔗 Funcionalidades Integradas
+
+- **Sensoriamento Real**: MAX30105 para medições precisas
+- **Comunicação Dupla**: ESP-NOW + Wi-Fi
+- **Interface Visual**: Display TFT + LED + Buzzer
+- **API Web**: Integração completa com Sleep Help
+- **Alertas**: Detecção automática de baixa saturação
+
+---
+**Desenvolvido para o TCC em Automação Industrial - ETEC Jorge Street**
