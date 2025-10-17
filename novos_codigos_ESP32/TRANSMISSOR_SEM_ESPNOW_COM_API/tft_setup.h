@@ -18,6 +18,7 @@
 #define TFT_BL    22  // LED back-light
 #define TFT_BACKLIGHT_ON HIGH
 
+
 #define LOAD_GLCD   
 #define LOAD_FONT2  
 #define LOAD_FONT4  
