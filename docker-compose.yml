@@ -4,6 +4,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      tags:
+        - sleep-help-backend:1.1.0
+        - sleep-help-backend:latest
     ports:
       - "3001:3001"
     container_name: sleep-help-backend
@@ -19,6 +22,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      tags:
+        - sleep-help-frontend:1.1.0
+        - sleep-help-frontend:latest
     ports:
       - "3000:80"
     container_name: sleep-help-frontend
