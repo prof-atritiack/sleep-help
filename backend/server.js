@@ -1,9 +1,13 @@
+// Carregar variáveis de ambiente do arquivo .env
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const http = require('http');
 const socketIo = require('socket.io');
 const moment = require('moment');
+const { sendAlarmAlert } = require('./whatsapp');
 
 const app = express();
 const server = http.createServer(app);
@@ -24,6 +28,13 @@ let sensorData = {
   spo2: [],
   lastUpdate: null
 };
+
+// Configuração WhatsApp (variáveis de ambiente)
+const WHATSAPP_PHONE = process.env.WHATSAPP_PHONE || '';
+const WHATSAPP_API_KEY = process.env.WHATSAPP_API_KEY || '';
+const ALARM_THRESHOLD = parseInt(process.env.ALARM_THRESHOLD || '95'); // SpO2 <= 95% gera alarme
+let lastAlarmSent = null; // Controla para não enviar múltiplos alarmes seguidos
+const ALARM_COOLDOWN = 60000; // 1 minuto entre alarmes (evita spam)
 
 // Dados de exemplo para demonstração
 const generateSampleData = () => {
@@ -68,10 +79,33 @@ app.post('/api/sensor-data', (req, res) => {
 
     console.log(`📊 Dados recebidos: SpO2=${dataPoint.spo2}%`);
 
+    // Verificar se há alarme e enviar WhatsApp
+    const isAlarm = dataPoint.spo2 <= ALARM_THRESHOLD;
+    const now = Date.now();
+    
+    if (isAlarm && WHATSAPP_PHONE && WHATSAPP_API_KEY) {
+      // Verificar se passou o tempo de cooldown desde o último alarme
+      if (!lastAlarmSent || (now - lastAlarmSent) >= ALARM_COOLDOWN) {
+        sendAlarmAlert(dataPoint.spo2, dataPoint.timestamp, WHATSAPP_PHONE, WHATSAPP_API_KEY)
+          .then((result) => {
+            console.log('✅ Alerta WhatsApp enviado:', result.message);
+            lastAlarmSent = now;
+          })
+          .catch((error) => {
+            console.error('❌ Erro ao enviar alerta WhatsApp:', error.message);
+          });
+      } else {
+        console.log(`⏸️ Alarme detectado, mas aguardando cooldown (último envio há ${Math.floor((now - lastAlarmSent) / 1000)}s)`);
+      }
+    } else if (isAlarm && (!WHATSAPP_PHONE || !WHATSAPP_API_KEY)) {
+      console.warn('⚠️ Alarme detectado, mas WhatsApp não configurado. Configure WHATSAPP_PHONE e WHATSAPP_API_KEY');
+    }
+
     res.json({ 
       success: true, 
       message: 'Dados recebidos com sucesso',
-      data: dataPoint
+      data: dataPoint,
+      alarm: isAlarm
     });
 
   } catch (error) {

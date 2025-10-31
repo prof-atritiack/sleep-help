@@ -22,6 +22,7 @@ O projeto integra hardware ESP32 com sensores biomédicos, uma API REST robusta 
 - ✅ **API REST Completa**: Backend Node.js com WebSocket
 - ✅ **Deploy Containerizado**: Docker para fácil instalação
 - ✅ **Sistema de Alertas**: Notificações automáticas para valores anormais
+- ✅ **Integração WhatsApp**: Alertas via mensagem quando valores críticos são detectados
 
 ## 🚀 Funcionalidades
 
@@ -45,6 +46,7 @@ O projeto integra hardware ESP32 com sensores biomédicos, uma API REST robusta 
 - **Validação de Dados**: Verificação automática de medições
 - **Armazenamento**: Histórico de até 1000 medições
 - **CORS**: Configurado para aceitar conexões externas
+- **Integração WhatsApp**: Envio automático de alertas via CallMeBot API
 
 ## 🏗️ Arquitetura do Sistema
 
@@ -370,6 +372,15 @@ docker system prune -a
 NODE_ENV=production
 PORT=3001
 
+# WhatsApp (Opcional - para alertas)
+# Para obter sua chave API do CallMeBot:
+# 1. Adicione o número +34 644 97 54 14 aos seus contatos
+# 2. Envie "Eu permito que o callmebot me envie mensagens" para esse contato
+# 3. Você receberá uma chave de API pessoal
+WHATSAPP_PHONE=5511999999999  # Formato: código do país + DDD + número
+WHATSAPP_API_KEY=sua_chave_api_aqui
+ALARM_THRESHOLD=95  # SpO2 <= 95% gera alarme
+
 # Frontend
 REACT_APP_API_URL=http://localhost:3001
 ```
@@ -426,6 +437,49 @@ docker-compose logs -f backend
 
 # Apenas frontend
 docker-compose logs -f frontend
+```
+
+## 📱 Configuração WhatsApp
+
+O sistema possui integração com WhatsApp para envio de alertas quando valores críticos de SpO2 são detectados.
+
+### Como Configurar
+
+1. **Obter Chave da API CallMeBot**:
+   - Adicione o número **+34 644 97 54 14** aos seus contatos do WhatsApp
+   - Envie a mensagem: **"Eu permito que o callmebot me envie mensagens"**
+   - Você receberá uma chave de API pessoal
+
+2. **Configurar Variáveis de Ambiente**:
+   ```bash
+   # No arquivo .env ou nas variáveis de ambiente do sistema
+   WHATSAPP_PHONE=5511999999999  # Seu número: código país + DDD + número
+   WHATSAPP_API_KEY=sua_chave_api_recebida
+   ALARM_THRESHOLD=95  # SpO2 <= 95% gera alarme (opcional, padrão: 95)
+   ```
+
+3. **Formato do Número**:
+   - Exemplo Brasil: `5511999999999` (55 + 11 + 999999999)
+   - Sem espaços, sem caracteres especiais, com código do país
+
+### Funcionamento
+
+- Quando o SpO2 for ≤ 95% (ou valor configurado), uma mensagem será enviada automaticamente
+- O sistema possui um cooldown de 1 minuto entre alarmes para evitar spam
+- As mensagens incluem o valor de SpO2 detectado e o horário da medição
+
+### Exemplo de Mensagem
+
+```
+🚨 *ALERTA DE SATURAÇÃO DE OXIGÊNIO*
+
+⚠️ Valores críticos detectados!
+
+📊 SpO2: 92%
+⏰ Horário: 2025-01-27 14:30:45
+
+🔴 ATENÇÃO: A saturação está abaixo do normal (≤95%).
+Por favor, verifique o paciente imediatamente.
 ```
 
 ## 📚 Documentação Adicional

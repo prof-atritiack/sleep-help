@@ -7,7 +7,7 @@ WORKDIR /app
 # Copiar package.json e package-lock.json
 COPY package*.json ./
 
-# Instalar dependências
+# Instalar dependências (incluindo dotenv para variáveis de ambiente)
 RUN npm ci --only=production
 
 # Copiar o código fonte
@@ -17,4 +17,5 @@ COPY . .
 EXPOSE 3001
 
 # Comando para iniciar o servidor
+# Nota: Variáveis de ambiente devem ser passadas via docker-compose.yml ou env_file
 CMD ["node", "server.js"]
