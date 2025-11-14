@@ -44,7 +44,9 @@ uint8_t wifiChannel = 0;
 unsigned long ultimoEnvioNOW = 0;
 unsigned long agendarEnvioAPI = 0; 
 int spo2Atual = 0;
-volatile bool now_ack_received = false; 
+volatile bool now_ack_received = false;
+bool primeiraLeituraValida = false; // Flag para controlar leitura simulada
+bool leituraSimuladaEnviada = false; // Flag para garantir que a simulação ocorra apenas uma vez 
 
 // Variáveis do Sensor
 MAX30105 particleSensor;
@@ -340,8 +342,20 @@ void loop() {
     // EXECUTA A LEITURA E CÁLCULO REAL DO SPO2
     lerSensorECalcularSpO2();
 
+    // DEMONSTRAÇÃO: Após primeira leitura válida, simula SpO2 baixo (<= 95) para demonstrar alarme
+    if (spo2Atual > 0 && !primeiraLeituraValida) {
+      primeiraLeituraValida = true;
+      Serial.println("[DEMO] ✅ Primeira leitura válida detectada (SpO2 = " + String(spo2Atual) + "%).");
+      Serial.println("[DEMO] 📊 Na próxima leitura, será enviado SpO2 = 92% (simulado) para demonstrar o alarme.");
+    } else if (primeiraLeituraValida && !leituraSimuladaEnviada && spo2Atual > 0) {
+      // Simula um valor <= 95 para demonstrar o alarme (apenas uma vez)
+      spo2Atual = 92; // Valor simulado baixo para disparar alarme
+      leituraSimuladaEnviada = true;
+      Serial.println("[DEMO] 📊 Leitura simulada enviada: SpO2 = 92% (para demonstração do alarme)");
+    }
+
     // Lógica de Alerta: SpO2 <= 95 E a medição foi válida (SpO2 > 0)
-    bool alerta = (spo2Atual >= 90 && spo2Atual > 0);
+    bool alerta = (spo2Atual <= 95 && spo2Atual > 0);
     
     // Prepara o pacote NOW
     dados.ledOn = alerta; 
@@ -371,8 +385,8 @@ void loop() {
     }
 
     // --- ATUALIZAÇÃO DO DISPLAY E ESTADO LOCAL ---
-    // Uso de ternário para evitar warnings
-    digitalWrite(BUZZER_PIN, (alerta ? HIGH : LOW)); 
+    // Lógica do buzzer INVERTIDA: quando alerta é true, buzzer fica LOW
+    digitalWrite(BUZZER_PIN, (alerta ? LOW : HIGH)); 
     digitalWrite(LED_PIN, (alerta ? HIGH : LOW));    
     
     // Atualiza status geral no TFT

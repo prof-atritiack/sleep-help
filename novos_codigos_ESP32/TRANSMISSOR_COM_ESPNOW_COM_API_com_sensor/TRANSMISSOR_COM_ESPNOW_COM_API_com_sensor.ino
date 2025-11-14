@@ -341,7 +341,7 @@ void loop() {
     lerSensorECalcularSpO2();
 
     // Lógica de Alerta: SpO2 <= 95 E a medição foi válida (SpO2 > 0)
-    bool alerta = (spo2Atual >= 90 && spo2Atual > 0);
+    bool alerta = (spo2Atual <= 95 && spo2Atual > 0);
     
     // Prepara o pacote NOW
     dados.ledOn = alerta; 
