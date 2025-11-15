@@ -45,8 +45,8 @@ unsigned long ultimoEnvioNOW = 0;
 unsigned long agendarEnvioAPI = 0; 
 int spo2Atual = 0;
 volatile bool now_ack_received = false;
-bool primeiraLeituraValida = false; // Flag para controlar leitura simulada
-bool leituraSimuladaEnviada = false; // Flag para garantir que a simulação ocorra apenas uma vez 
+int valorRealSpO2 = 0; // Armazena o valor real da leitura
+unsigned long agendarEnvioSimulado = 0; // Agenda envio do valor simulado 
 
 // Variáveis do Sensor
 MAX30105 particleSensor;
@@ -314,7 +314,7 @@ void setup() {
   }
   esp_now_register_send_cb(onSent);
 
-  // Adicionar Peer
+  // Adicionar Peer - Usa MAC específico do receptor
   esp_now_peer_info_t peerInfo = {};
   peerInfo.channel = wifiChannel; 
   memcpy(peerInfo.peer_addr, broadcastAddress, 6);
@@ -324,6 +324,11 @@ void setup() {
     Serial.println("[NOW] ❌ Erro ao adicionar peer");
     while (true);
   }
+  
+  Serial.printf("[NOW] ✅ Peer adicionado: MAC %02X:%02X:%02X:%02X:%02X:%02X no canal %d\n",
+                broadcastAddress[0], broadcastAddress[1], broadcastAddress[2],
+                broadcastAddress[3], broadcastAddress[4], broadcastAddress[5],
+                wifiChannel);
   
   dados.id = 1;
   dados.ledOn = false; 
@@ -342,27 +347,21 @@ void loop() {
     // EXECUTA A LEITURA E CÁLCULO REAL DO SPO2
     lerSensorECalcularSpO2();
 
-    // DEMONSTRAÇÃO: Após primeira leitura válida, simula SpO2 baixo (<= 95) para demonstrar alarme
-    if (spo2Atual > 0 && !primeiraLeituraValida) {
-      primeiraLeituraValida = true;
-      Serial.println("[DEMO] ✅ Primeira leitura válida detectada (SpO2 = " + String(spo2Atual) + "%).");
-      Serial.println("[DEMO] 📊 Na próxima leitura, será enviado SpO2 = 92% (simulado) para demonstrar o alarme.");
-    } else if (primeiraLeituraValida && !leituraSimuladaEnviada && spo2Atual > 0) {
-      // Simula um valor <= 95 para demonstrar o alarme (apenas uma vez)
-      spo2Atual = 92; // Valor simulado baixo para disparar alarme
-      leituraSimuladaEnviada = true;
-      Serial.println("[DEMO] 📊 Leitura simulada enviada: SpO2 = 92% (para demonstração do alarme)");
-    }
+    // Salva o valor real
+    valorRealSpO2 = spo2Atual;
 
     // Lógica de Alerta: SpO2 <= 95 E a medição foi válida (SpO2 > 0)
     bool alerta = (spo2Atual <= 95 && spo2Atual > 0);
     
-    // Prepara o pacote NOW
+    // Prepara o pacote NOW com valor REAL
     dados.ledOn = alerta; 
     now_ack_received = false; 
     
-    // ENVIO ESP-NOW
-    esp_now_send(broadcastAddress, (uint8_t *)&dados, sizeof(dados));
+    // ENVIO ESP-NOW com valor REAL
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *)&dados, sizeof(dados));
+    if (result != ESP_OK) {
+      Serial.println("[NOW] ❌ Erro ao enviar dados");
+    }
 
     delay(50); 
     
@@ -377,11 +376,14 @@ void loop() {
         tft.print("NOW: FALHA NO ENVIO (SEM ACK!)");
     }
 
-    // Só agenda a API se houver um valor válido
+    // Agenda envio da API com valor REAL
     if (spo2Atual > 0) {
       agendarEnvioAPI = millis() + DELAY_API_APOS_NOW;
+      // Agenda envio SIMULADO após o envio real (2 segundos depois da API real)
+      agendarEnvioSimulado = millis() + DELAY_API_APOS_NOW + 2000;
     } else {
       agendarEnvioAPI = 0; // Não envia dados inválidos
+      agendarEnvioSimulado = 0;
     }
 
     // --- ATUALIZAÇÃO DO DISPLAY E ESTADO LOCAL ---
@@ -398,9 +400,33 @@ void loop() {
     ultimoEnvioNOW = millis();
   }
 
-  // 2. CHECA E EXECUTA o ENVIO DA API (Sequencial)
+  // 2. CHECA E EXECUTA o ENVIO DA API com valor REAL (Sequencial)
   if (agendarEnvioAPI != 0 && millis() >= agendarEnvioAPI) {
-    executarEnvioAPI(spo2Atual);
+    executarEnvioAPI(spo2Atual); // Envia valor REAL para API
+    agendarEnvioAPI = 0; // Limpa flag
+  }
+
+  // 3. DEMONSTRAÇÃO: Envia valor SIMULADO após enviar o real
+  if (agendarEnvioSimulado != 0 && millis() >= agendarEnvioSimulado && valorRealSpO2 > 0) {
+    Serial.println("[DEMO] 📊 Enviando leitura SIMULADA: 92% (para demonstração do alarme)");
+    
+    // Simula valor baixo para alarme
+    int valorSimulado = 92;
+    bool alertaSimulado = true;
+    
+    // Envia via ESP-NOW (simulado)
+    dados.ledOn = alertaSimulado;
+    now_ack_received = false;
+    esp_err_t resultSimulado = esp_now_send(broadcastAddress, (uint8_t *)&dados, sizeof(dados));
+    if (resultSimulado != ESP_OK) {
+      Serial.println("[NOW] ❌ Erro ao enviar dados simulados");
+    }
+    delay(50);
+    
+    // Envia via API (simulado) - TODAS as leituras (reais e simuladas) vão para API
+    executarEnvioAPI(valorSimulado);
+    
+    agendarEnvioSimulado = 0; // Limpa flag
   }
   
   // Pequeno delay para evitar loop infinito na leitura, mantendo responsividade

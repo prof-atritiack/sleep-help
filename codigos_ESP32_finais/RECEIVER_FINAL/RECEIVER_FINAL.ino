@@ -4,12 +4,6 @@
 
 #define LED_ALARME 13 // Pino onde o LED/Buzzer de alarme está conectado
 
-// ⚠️ IMPORTANTE: Configure o canal WiFi aqui (deve ser o mesmo do transmissor)
-// O transmissor imprime o canal no Serial quando conecta ao WiFi
-// Exemplo: "[WIFI/NOW] Canal sincronizado para 6"
-// Se não souber, deixe 1 e veja o Serial do transmissor para descobrir
-#define WIFI_CHANNEL 1  // ⚠️ ALTERE PARA O CANAL DO TRANSMISSOR!
-
 // Struct deve ser idêntica à do transmissor
 typedef struct {
   int id;
@@ -19,30 +13,117 @@ typedef struct {
 mensagem dados;
 
 // Variáveis para controle
-unsigned long ultimaRecepcao = 0;
 int contadorRecebidos = 0;
+
+// Callback de envio (para confirmar ACK quando receptor envia dados)
+void OnDataSent(const wifi_tx_info_t *tx_info, esp_now_send_status_t status) {
+  if (status == ESP_NOW_SEND_SUCCESS) {
+    Serial.println("[NOW_SEND] ✅ ACK enviado com sucesso");
+  } else {
+    Serial.println("[NOW_SEND] ❌ Falha ao enviar ACK");
+  }
+}
 
 // Callback que será chamada quando os dados ESP-NOW forem recebidos
 void OnDataRecv(const esp_now_recv_info_t *info, const uint8_t *incomingData, int len) {
   // Ação Imediata: Copia os dados recebidos para a struct 'dados'
   memcpy(&dados, incomingData, sizeof(dados));
   
-  ultimaRecepcao = millis();
   contadorRecebidos++;
+
+  // Log do MAC do transmissor que enviou
+  char macStr[18];
+  snprintf(macStr, sizeof(macStr), "%02X:%02X:%02X:%02X:%02X:%02X",
+           info->src_addr[0], info->src_addr[1], info->src_addr[2],
+           info->src_addr[3], info->src_addr[4], info->src_addr[5]);
 
   // Ação de Log (SÓ IMPRIME QUANDO RECEBE DADOS)
   Serial.print("[NOW_RECV] #");
   Serial.print(contadorRecebidos);
-  Serial.print(" | ID Transmissor: ");
+  Serial.print(" | MAC TX: ");
+  Serial.print(macStr);
+  Serial.print(" | ID: ");
   Serial.print(dados.id);
-  Serial.print(" | Status Alarme: ");
-  Serial.println(dados.ledOn ? "🚨 LIGADO (ALERTA)" : "✅ DESLIGADO (OK)");
+  Serial.print(" | Status: ");
+  Serial.println(dados.ledOn ? "🚨 ALERTA" : "✅ OK");
 
   // Ação de Atuação (SÓ ATUA QUANDO RECEBE DADOS)
   if (dados.ledOn) {
     digitalWrite(LED_ALARME, HIGH);
   } else {
     digitalWrite(LED_ALARME, LOW);
+  }
+  
+  // O ESP-NOW envia ACK automaticamente quando recebe dados
+  // Não precisa fazer nada - o ACK é enviado automaticamente pelo protocolo
+}
+
+// Configurações de rede (mesmas do transmissor para descobrir o canal correto)
+const char* ssid = "STREET_WIFI_SM"; 
+const char* password = "StreetFI";
+
+// Função para descobrir o canal WiFi conectando à mesma rede do transmissor
+int descobrirCanalWiFi() {
+  Serial.println("[SCAN] 🔍 Conectando ao WiFi para descobrir canal...");
+  
+  // Tenta conectar ao WiFi (mesma rede do transmissor)
+  WiFi.begin(ssid, password);
+  
+  int tentativas = 0;
+  Serial.print("[WIFI] Conectando");
+  while (WiFi.status() != WL_CONNECTED && tentativas < 10) {
+    delay(500);
+    Serial.print(".");
+    tentativas++;
+  }
+  
+  if (WiFi.status() == WL_CONNECTED) {
+    int canal = WiFi.channel();
+    Serial.println();
+    Serial.printf("[WIFI] ✅ Conectado! Canal descoberto: %d\n", canal);
+    WiFi.disconnect(); // Desconecta após descobrir o canal
+    delay(100);
+    return canal;
+  } else {
+    Serial.println();
+    Serial.println("[WIFI] ⚠️  Não conseguiu conectar, escaneando redes...");
+    
+    // Fallback: escaneia redes para descobrir canal
+    int n = WiFi.scanNetworks();
+    if (n == 0) {
+      Serial.println("[SCAN] ⚠️  Nenhuma rede encontrada, usando canal 1");
+      return 1;
+    }
+    
+    // Procura especificamente pela rede do transmissor
+    for (int i = 0; i < n; i++) {
+      if (WiFi.SSID(i) == ssid) {
+        int canal = WiFi.channel(i);
+        Serial.printf("[SCAN] ✅ Rede '%s' encontrada no canal %d\n", ssid, canal);
+        return canal;
+      }
+    }
+    
+    // Se não encontrou a rede específica, usa o canal mais comum
+    int canais[14] = {0};
+    for (int i = 0; i < n; i++) {
+      int canal = WiFi.channel(i);
+      if (canal >= 1 && canal <= 13) {
+        canais[canal]++;
+      }
+    }
+    
+    int canalMaisComum = 1;
+    int maxRedes = canais[1];
+    for (int i = 2; i <= 13; i++) {
+      if (canais[i] > maxRedes) {
+        maxRedes = canais[i];
+        canalMaisComum = i;
+      }
+    }
+    
+    Serial.printf("[SCAN] ✅ Canal mais comum: %d\n", canalMaisComum);
+    return canalMaisComum;
   }
 }
 
@@ -60,16 +141,19 @@ void setup() {
   // Força WiFi em modo STA para usar o ESP-NOW
   WiFi.mode(WIFI_STA);
   
-  // Configura o canal WiFi (CRÍTICO para ESP-NOW funcionar)
-  if (esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE) == ESP_OK) {
-    Serial.printf("[WIFI] ✅ Canal WiFi configurado: %d\n", WIFI_CHANNEL);
+  // Descobre o canal WiFi automaticamente (uma vez só)
+  int canalWiFi = descobrirCanalWiFi();
+  
+  // Configura o canal WiFi descoberto
+  if (esp_wifi_set_channel(canalWiFi, WIFI_SECOND_CHAN_NONE) == ESP_OK) {
+    Serial.printf("[WIFI] ✅ Canal WiFi: %d\n", canalWiFi);
   } else {
-    Serial.println("[WIFI] ⚠️ Aviso: Falha ao configurar canal (pode funcionar mesmo assim)");
+    Serial.println("[WIFI] ⚠️ Aviso: Falha ao configurar canal");
   }
   
   // Desativa power save para melhor recepção
   if (esp_wifi_set_ps(WIFI_PS_NONE) == ESP_OK) {
-    Serial.println("[WIFI] ✅ Power Save desativado para melhor recepção");
+    Serial.println("[WIFI] ✅ Power Save desativado");
   }
   
   // Inicia WiFi
@@ -94,32 +178,22 @@ void setup() {
     return;
   }
 
-  // Registra a função de callback para receber dados
-  esp_now_register_recv_cb(OnDataRecv);
+  // IMPORTANTE: Receptor não precisa adicionar peer para receber
+  // O ESP-NOW funciona em modo promiscuous - recebe automaticamente de qualquer transmissor no mesmo canal
+  // O ACK é enviado automaticamente pelo protocolo ESP-NOW quando recebe dados
 
-  Serial.println("[NOW] ✅ ESP-NOW inicializado com sucesso");
-  Serial.println("[NOW] 📡 Pronto para receber comandos de alarme");
-  Serial.println("");
-  Serial.println("⚠️  TROUBLESHOOTING:");
-  Serial.println("   1. Verifique o canal WiFi (atual: " + String(WIFI_CHANNEL) + ")");
-  Serial.println("   2. Veja o Serial do TRANSMISSOR para descobrir o canal");
-  Serial.println("   3. Procure por: '[WIFI/NOW] Canal sincronizado para X'");
-  Serial.println("   4. Altere WIFI_CHANNEL no receptor para o mesmo valor");
-  Serial.println("   5. Certifique-se de que ambos estão ligados e próximos");
+  // Registra callbacks
+  esp_now_register_recv_cb(OnDataRecv);  // Callback de recepção
+  esp_now_register_send_cb(OnDataSent); // Callback de envio (para logs de ACK)
+
+  Serial.println("[NOW] ✅ ESP-NOW inicializado");
+  Serial.println("[NOW] 📡 Pronto para receber comandos");
+  Serial.println("[NOW] 💡 Recebendo de qualquer transmissor no canal " + String(canalWiFi));
   Serial.println("========================================\n");
 }
 
 void loop() {
-  // Monitora se está recebendo dados
-  if (ultimaRecepcao > 0 && (millis() - ultimaRecepcao) > 30000) {
-    // Se não recebeu nada nos últimos 30 segundos, avisa
-    static unsigned long ultimoAviso = 0;
-    if (millis() - ultimoAviso > 60000) { // Avisa a cada 60 segundos
-      Serial.println("[NOW] ⚠️  Nenhum dado recebido há mais de 30 segundos");
-      Serial.println("[NOW]    Verifique: canal WiFi, distância, alimentação");
-      ultimoAviso = millis();
-    }
-  }
-  
-  delay(100); // Pequeno delay para não sobrecarregar
+  // O loop fica livre. A lógica de recepção está no callback OnDataRecv
+  // Não fica tentando canais - configura uma vez e funciona!
+  delay(100);
 }
