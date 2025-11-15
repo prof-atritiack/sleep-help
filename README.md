@@ -10,19 +10,42 @@ Interface web completa para monitoramento de SpO2 (Saturação de Oxigênio) dur
 
 ## 📋 Sobre o Projeto
 
-**Sleep Help** é um sistema completo de monitoramento de saúde desenvolvido como trabalho de conclusão de curso técnico em **Automação Industrial** da **ETEC Jorge Street**.
+**Sleep Help** é um sistema completo de monitoramento de saúde desenvolvido como **Trabalho de Conclusão de Curso (TCC)** do curso técnico em **Automação Industrial** da **ETEC Jorge Street**, localizada em **São Caetano do Sul - SP**.
 
 O projeto integra hardware ESP32 com sensores biomédicos, uma API REST robusta e uma interface web moderna para monitoramento contínuo de parâmetros vitais durante o sono.
 
-## 🎯 Objetivos
+### 🎓 Contexto Acadêmico
 
-- ✅ **Monitoramento em Tempo Real**: Acompanhamento contínuo de SpO2
-- ✅ **Interface Web Responsiva**: Dashboard moderno e acessível
-- ✅ **Integração Hardware**: ESP32 com sensor MAX30105
-- ✅ **API REST Completa**: Backend Node.js com WebSocket
-- ✅ **Deploy Containerizado**: Docker para fácil instalação
-- ✅ **Sistema de Alertas**: Notificações automáticas para valores anormais
-- ✅ **Integração WhatsApp**: Alertas via mensagem quando valores críticos são detectados
+Este projeto foi desenvolvido com o objetivo de aplicar os conhecimentos adquiridos durante o curso técnico em Automação Industrial, demonstrando a integração entre sistemas eletrônicos, programação e desenvolvimento web.
+
+**Orientação e Desenvolvimento:**
+- **Desenvolvedor**: Prof. André Tritiack (Old Timer IoT Labs)
+- **Orientador**: Prof. André Tritiack - Orientação técnica e desenvolvimento do projeto
+- **Organização**: Old Timer IoT Labs
+- **Ferramenta de Desenvolvimento**: Este projeto foi desenvolvido com auxílio de **Inteligência Artificial** através da plataforma **Cursor AI**, uma IDE moderna que utiliza modelos avançados de IA (Claude Sonnet, GPT-4) para assistência em programação, refatoração de código e debugging.
+
+### 🛠️ Ferramentas Utilizadas no Desenvolvimento
+
+- **Cursor AI** - IDE com assistência de IA para desenvolvimento
+  - Autocompletar inteligente
+  - Refatoração automática de código
+  - Debugging assistido
+  - Suporte nativo para React, JavaScript, Node.js e Arduino
+  - [Documentação Cursor AI](https://cursor.sh/docs)
+- **Old Timer IoT Labs** - Organização de desenvolvimento e pesquisa em IoT
+
+## 🎯 Objetivos do Projeto
+
+Este projeto foi desenvolvido com o objetivo de criar um sistema completo de monitoramento de saúde que integra hardware e software, demonstrando competências técnicas em:
+
+- ✅ **Monitoramento em Tempo Real**: Acompanhamento contínuo de SpO2 (Saturação de Oxigênio)
+- ✅ **Interface Web Responsiva**: Dashboard moderno e acessível para visualização de dados
+- ✅ **Integração Hardware-Software**: Comunicação entre ESP32 e aplicação web
+- ✅ **API REST Completa**: Backend Node.js com WebSocket para comunicação em tempo real
+- ✅ **Deploy Containerizado**: Docker para fácil instalação e portabilidade
+- ✅ **Sistema de Alertas Inteligente**: Notificações automáticas para valores anormais
+- ✅ **Integração com WhatsApp**: Alertas via mensagem quando valores críticos são detectados
+- ✅ **Comunicação ESP-NOW**: Protocolo de comunicação peer-to-peer entre ESP32s
 
 ## 🚀 Funcionalidades
 
@@ -50,20 +73,32 @@ O projeto integra hardware ESP32 com sensores biomédicos, uma API REST robusta 
 
 ## 🏗️ Arquitetura do Sistema
 
+O sistema é composto por três componentes principais que trabalham em conjunto:
+
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   ESP32 +       │    │   Backend API   │    │   Frontend      │
-│   MAX30105      │───▶│   Node.js       │───▶│   React         │
-│   (Hardware)    │    │   + WebSocket   │    │   + Dashboard   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   ESP-NOW       │    │   Docker        │    │   Nginx         │
-│   (Local)       │    │   Container     │    │   (Static)      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   ESP32 +           │    │   Backend API   │    │   Frontend      │
+│   MAX30105          │───▶│   Node.js       │───▶│   React         │
+│   (Transmissor)     │    │   + WebSocket   │    │   + Dashboard   │
+└─────────────────────┘    └─────────────────┘    └─────────────────┘
+         │                           │                       │
+         │                           │                       │
+         │                           │                       │
+         ▼                           ▼                       ▼
+┌─────────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   ESP32             │    │   Docker        │    │   Nginx         │
+│   (Receptor)        │    │   Container     │    │   (Static)      │
+│   ESP-NOW           │    │   + Compose     │    │   (Frontend)    │
+└─────────────────────┘    └─────────────────┘    └─────────────────┘
 ```
+
+### 📡 Fluxo de Dados
+
+1. **Hardware (ESP32 Transmissor)**: Lê dados do sensor MAX30105 e envia via Wi-Fi para a API
+2. **Comunicação Local (ESP-NOW)**: Transmissor envia alertas via ESP-NOW para o receptor
+3. **Backend (Node.js)**: Recebe dados, armazena histórico e envia alertas via WhatsApp
+4. **Frontend (React)**: Exibe dados em tempo real através de WebSocket
+5. **Receptor (ESP32)**: Ativa buzzer e lâmpada quando recebe alertas via ESP-NOW
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -83,9 +118,10 @@ O projeto integra hardware ESP32 com sensores biomédicos, uma API REST robusta 
 
 ### Hardware
 - **ESP32 DevKit V1** - Microcontrolador Wi-Fi/Bluetooth
-- **MAX30105** - Sensor de oxímetro de pulso
-- **TFT Display** - Interface visual
-- **Arduino IDE** - Desenvolvimento do firmware
+- **MAX30105** - Sensor de oxímetro de pulso (SpO2 e frequência cardíaca)
+- **TFT Display** - Interface visual no dispositivo
+- **Arduino IDE** - Ambiente de desenvolvimento do firmware
+- **Componentes de Alerta**: Buzzer, LED, Lâmpada, Vibrador
 
 ### Deploy
 - **Docker** - Containerização
@@ -108,12 +144,20 @@ O projeto integra hardware ESP32 com sensores biomédicos, uma API REST robusta 
 - Navegador web moderno
 
 ### Para Hardware
-- ESP32 DevKit V1
-- Sensor MAX30105
-- Display TFT (opcional)
-- Buzzer (opcional)
-- Arduino IDE
-- Bibliotecas: MAX30105, TFT_eSPI, WiFi, HTTPClient, ArduinoJson
+- **2x ESP32 DevKit V1** (um para transmissor, um para receptor)
+- **Sensor MAX30105** (para o transmissor)
+- **Display TFT** (opcional, para visualização local)
+- **Componentes de Alerta**:
+  - Buzzer (pino 13 no receptor)
+  - Lâmpada (pino 14 no receptor)
+  - Vibrador (pino 4 no transmissor)
+  - LEDs (pino 2 em ambos)
+- **Arduino IDE** com suporte ESP32
+- **Bibliotecas necessárias**:
+  - MAX30105 (sensor de SpO2)
+  - TFT_eSPI (display)
+  - WiFi, HTTPClient, ArduinoJson (comunicação)
+  - esp_now (comunicação peer-to-peer)
 
 ### Para Deploy
 - Docker Desktop
@@ -126,7 +170,7 @@ O projeto integra hardware ESP32 com sensores biomédicos, uma API REST robusta 
 ### 1. Clone o Repositório
 
 ```bash
-git clone https://github.com/seu-usuario/sleep-help.git
+git clone https://github.com/prof-atritiack/sleep-help.git
 cd sleep-help
 ```
 
@@ -506,23 +550,22 @@ Por favor, verifique o paciente imediatamente.
 ## 📚 Documentação Adicional
 
 ### **Hardware e ESP32**
-- [Configuração ESP32](codigos_arduino/TRANSMISSOR_ESP32_V3/README_API.md)
-- [Protocolo de Comunicação](ESP32_PROTOCOL.md)
+- [Configuração ESP32](CONFIGURACAO_ESP32.md) - Guia completo de configuração do hardware
+- [Protocolo de Comunicação](ESP32_PROTOCOL.md) - Especificações técnicas de comunicação
 
-### **Deploy e Infraestrutura**
-- [Deploy Rápido (15 min)](DEPLOY_RAPIDO.md)
-- [Deploy na Nuvem](DEPLOY_CLOUD.md)
-- [Alternativas de Deploy](DEPLOY_ALTERNATIVAS.md)
-- [Deploy Docker](DOCKER_DEPLOY.md)
-- [Configuração Docker](DOCKER_SETUP.md)
+### **Instalação e Setup**
+- [Setup Rápido](SETUP.md) - Guia rápido para instalação em nova máquina
 
 ## 🔬 Aplicações e Benefícios
 
-- **Monitoramento do Sono**: Acompanhamento da qualidade do sono
-- **Prevenção de Problemas**: Identificação precoce de anormalidades
-- **Acompanhamento Médico**: Dados para consultas e tratamentos
-- **Pesquisa**: Base de dados para estudos sobre padrões de sono
-- **Automação Industrial**: Aplicação prática dos conhecimentos técnicos
+Este sistema pode ser aplicado em diversos contextos:
+
+- **Monitoramento do Sono**: Acompanhamento contínuo da qualidade do sono e saturação de oxigênio
+- **Prevenção de Problemas**: Identificação precoce de anormalidades respiratórias
+- **Acompanhamento Médico**: Fornecimento de dados históricos para consultas e tratamentos
+- **Pesquisa Científica**: Base de dados para estudos sobre padrões de sono e saúde
+- **Automação Industrial**: Demonstração prática de integração entre sistemas eletrônicos e software
+- **Telemedicina**: Monitoramento remoto de pacientes
 
 ## 🤝 Contribuição
 
@@ -532,65 +575,133 @@ Por favor, verifique o paciente imediatamente.
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
-## 📚 Fontes e Referências
+## 📚 Referências e Fontes
 
-### Documentação Técnica
-- [ESP32 Technical Reference Manual](https://www.espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf)
-- [React Documentation](https://react.dev/)
-- [Node.js Documentation](https://nodejs.org/docs/)
-- [Docker Documentation](https://docs.docker.com/)
+### 📖 Documentação Técnica Oficial
 
-### Sensores e Hardware
-- [MAX30105 Pulse Oximeter Sensor](https://www.analog.com/en/products/max30105.html)
-- [ESP32 DevKit V1 Pinout](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html)
+#### Microcontroladores e Hardware
+- [ESP32 Technical Reference Manual](https://www.espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf) - Manual oficial do ESP32
+- [ESP32 DevKit V1 Pinout](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html) - Diagrama de pinos do ESP32
+- [MAX30105 Datasheet](https://datasheets.maximintegrated.com/en/ds/MAX30105.pdf) - Especificações técnicas do sensor
+- [Arduino ESP32 Core](https://github.com/espressif/arduino-esp32) - Repositório oficial do core ESP32 para Arduino
 
-### Padrões e Protocolos
-- [IEEE 11073 - Medical Device Communication](https://standards.ieee.org/standard/11073-10407-2010.html)
-- [WebSocket Protocol](https://tools.ietf.org/html/rfc6455)
+#### Desenvolvimento Web
+- [React Documentation](https://react.dev/) - Documentação oficial do React
+- [Node.js Documentation](https://nodejs.org/docs/) - Documentação oficial do Node.js
+- [Express.js Guide](https://expressjs.com/en/guide/routing.html) - Guia oficial do Express
+- [Socket.io Documentation](https://socket.io/docs/v4/) - Documentação do Socket.io
 
-### Estudos e Pesquisas
-- [Sleep Quality and Health Monitoring](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3632337/)
-- [Wearable Health Technology](https://ieeexplore.ieee.org/document/8259811)
+#### Containerização e Deploy
+- [Docker Documentation](https://docs.docker.com/) - Documentação oficial do Docker
+- [Docker Compose Documentation](https://docs.docker.com/compose/) - Guia do Docker Compose
+- [Nginx Documentation](https://nginx.org/en/docs/) - Documentação do servidor Nginx
 
-### Ferramentas de Desenvolvimento
+### 🔬 Padrões e Protocolos
+
+- [IEEE 11073 - Medical Device Communication](https://standards.ieee.org/standard/11073-10407-2010.html) - Padrão IEEE para comunicação de dispositivos médicos
+- [WebSocket Protocol (RFC 6455)](https://tools.ietf.org/html/rfc6455) - Especificação do protocolo WebSocket
+- [ESP-NOW Protocol](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_now.html) - Documentação do protocolo ESP-NOW
+
+### 📊 Estudos e Pesquisas Científicas
+
+- [Sleep Quality and Health Monitoring](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3632337/) - Estudo sobre monitoramento de qualidade do sono
+- [Wearable Health Technology](https://ieeexplore.ieee.org/document/8259811) - Pesquisa sobre tecnologia vestível para saúde
+- [Pulse Oximetry: Principles and Limitations](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4504215/) - Princípios e limitações da oximetria de pulso
+
+### 🛠️ Ferramentas de Desenvolvimento
+
 - **Cursor AI** - IDE inteligente com assistência de IA
-  - **Modelos**: Claude Sonnet 4, GPT-4, e outros modelos avançados
-  - **Recursos**: Autocompletar inteligente, refatoração automática, debugging assistido
-  - **Integração**: Suporte nativo para React, JavaScript, e desenvolvimento web moderno
-- [Cursor AI Documentation](https://cursor.sh/docs)
+  - Website: [cursor.sh](https://cursor.sh)
+  - Documentação: [cursor.sh/docs](https://cursor.sh/docs)
+  - Modelos utilizados: Claude Sonnet 4, GPT-4
+  - Recursos: Autocompletar inteligente, refatoração automática, debugging assistido, suporte multi-linguagem
 
-## 🎓 Contexto Acadêmico
+### 🎓 Instituição e Orientação
 
-Este projeto foi desenvolvido como **Trabalho de Conclusão de Curso (TCC)** do curso técnico em **Automação Industrial** da **ETEC Jorge Street**.
+- **ETEC Jorge Street** - Escola Técnica Estadual
+  - Localização: São Caetano do Sul - SP
+  - Curso: Técnico em Automação Industrial
+  - Website: [etecjorgestreet.com.br](https://www.etecjorgestreet.com.br)
+- **Desenvolvedor/Orientador**: Prof. André Tritiack
+  - Organização: Old Timer IoT Labs
+  - GitHub: [prof-atritiack](https://github.com/prof-atritiack)
+  - Orientação técnica e desenvolvimento do projeto
+
+## 🎓 Contexto Acadêmico e Competências Desenvolvidas
 
 ### Objetivos Educacionais
-- Aplicação prática dos conhecimentos em automação industrial
-- Integração de sistemas eletrônicos com interfaces web
-- Desenvolvimento de soluções para problemas reais da indústria
-- Demonstração de competências técnicas adquiridas durante o curso
 
-### Competências Desenvolvidas
-- Programação de microcontroladores (ESP32)
-- Desenvolvimento de interfaces web (React)
-- Desenvolvimento de APIs (Node.js)
-- Containerização (Docker)
-- Integração de sistemas
+Este projeto foi desenvolvido como **Trabalho de Conclusão de Curso (TCC)** do curso técnico em **Automação Industrial** da **ETEC Jorge Street**, localizada em **São Caetano do Sul - SP**.
+
+Os objetivos educacionais incluem:
+- ✅ Aplicação prática dos conhecimentos em automação industrial
+- ✅ Integração de sistemas eletrônicos com interfaces web modernas
+- ✅ Desenvolvimento de soluções para problemas reais da indústria e saúde
+- ✅ Demonstração de competências técnicas adquiridas durante o curso
+- ✅ Utilização de tecnologias modernas (IA, Docker, WebSockets)
+
+### Competências Técnicas Desenvolvidas
+
+Durante o desenvolvimento deste projeto, foram aplicadas e desenvolvidas as seguintes competências:
+
+#### Hardware e Eletrônica
+- Programação de microcontroladores ESP32 em C/C++ (Arduino)
+- Integração de sensores biomédicos (MAX30105)
+- Comunicação sem fio (Wi-Fi e ESP-NOW)
+- Controle de dispositivos de saída (LEDs, buzzer, vibrador)
+
+#### Desenvolvimento de Software
+- Desenvolvimento de interfaces web com React
+- Criação de APIs RESTful com Node.js e Express
+- Implementação de comunicação em tempo real com WebSocket
+- Integração com APIs externas (WhatsApp via CallMeBot)
+
+#### DevOps e Infraestrutura
+- Containerização com Docker
+- Orquestração com Docker Compose
+- Configuração de servidor web (Nginx)
+- Deploy e portabilidade de aplicações
+
+#### Metodologias e Ferramentas
+- Uso de Inteligência Artificial para desenvolvimento (Cursor AI)
+- Versionamento de código (Git)
+- Documentação técnica completa
 - Gestão de projetos técnicos
-- Documentação técnica
 
 ## 📄 Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## 📞 Contato
+## 📞 Informações do Projeto
 
-- **Projeto**: [Sleep Help](https://github.com/seu-usuario/sleep-help)
+- **Projeto**: Sleep Help - Sistema de Monitoramento de SpO2
+- **Desenvolvedor**: Prof. André Tritiack
+- **Organização**: Old Timer IoT Labs
+- **GitHub**: [prof-atritiack](https://github.com/prof-atritiack)
 - **Instituição**: ETEC Jorge Street
+- **Localização**: São Caetano do Sul - SP, Brasil
 - **Curso**: Técnico em Automação Industrial
-- **Desenvolvedor**: [Seu Nome]
+- **Tipo**: Trabalho de Conclusão de Curso (TCC)
+- **Orientador**: Prof. André Tritiack
+- **Ferramenta de Desenvolvimento**: Cursor AI (com assistência de IA)
+
+---
+
+## 🙏 Agradecimentos
+
+Agradecimentos especiais ao **Prof. André Tritiack** (Old Timer IoT Labs) pela orientação técnica e suporte durante o desenvolvimento deste projeto.
+
+---
+
+## 🔗 Links e Contato
+
+- **Repositório GitHub**: [github.com/prof-atritiack/sleep-help](https://github.com/prof-atritiack/sleep-help)
+- **Desenvolvedor**: Prof. André Tritiack
+- **Organização**: Old Timer IoT Labs
+- **Perfil GitHub**: [@prof-atritiack](https://github.com/prof-atritiack)
 
 ---
 
 ⭐ Se este projeto te ajudou, considere dar uma estrela!
 
-*Desenvolvido com ❤️ para o TCC em Automação Industrial da ETEC Jorge Street*
+*Desenvolvido com ❤️ e assistência de IA (Cursor) para o TCC em Automação Industrial da ETEC Jorge Street - São Caetano do Sul*
