@@ -121,6 +121,8 @@ O projeto integra hardware ESP32 com sensores biomédicos, uma API REST robusta 
 
 ## 🚀 Instalação e Configuração
 
+> **📌 Para instalação rápida em nova máquina, consulte [SETUP.md](SETUP.md)**
+
 ### 1. Clone o Repositório
 
 ```bash
@@ -153,8 +155,10 @@ node server.js
 
 ### 3. Deploy com Docker (Recomendado)
 
+> **📌 Para setup rápido, consulte [SETUP.md](SETUP.md)**
+
 #### Instalar Docker Desktop
-1. Baixe e instale o Docker Desktop
+1. Baixe e instale o Docker Desktop: https://www.docker.com/products/docker-desktop/
 2. Inicie o Docker Desktop
 3. Verifique se está rodando: `docker ps`
 
@@ -170,7 +174,21 @@ docker-compose ps
 docker-compose logs -f
 ```
 
+#### Configurar Variáveis de Ambiente (Opcional - WhatsApp)
+```bash
+# Copiar arquivo de exemplo
+cd backend
+cp .env.example .env
+
+# Editar e preencher com suas credenciais
+# WHATSAPP_PHONE=5511999999999
+# WHATSAPP_API_KEY=sua_chave_aqui
+# ALARM_THRESHOLD=95
+```
+
 ### 4. Configuração do ESP32
+
+> **📌 Para detalhes completos, consulte [CONFIGURACAO_ESP32.md](CONFIGURACAO_ESP32.md) e [ESP32_PROTOCOL.md](ESP32_PROTOCOL.md)**
 
 #### Instalar Bibliotecas
 1. Abra o Arduino IDE
@@ -180,9 +198,12 @@ docker-compose logs -f
    - WiFi
    - HTTPClient
    - ArduinoJson
+   - esp_now
 
 #### Configurar Código
-1. Abra o arquivo: `codigos_arduino/TRANSMISSOR_ESP32_V3/TRANSMISSOR_ESP32_V3_API.ino`
+1. Abra os arquivos em: `codigos_ESP32_finais/`
+   - **TRANSMISSOR_FINAL**: Código do transmissor (com sensor)
+   - **RECEIVER_FINAL**: Código do receptor (com ESP-NOW)
 2. Configure as credenciais Wi-Fi:
    ```cpp
    const char* ssid = "sua_rede_wifi";
@@ -244,10 +265,10 @@ docker-compose logs -f
 - ✅ **Máxima escalabilidade**
 - ✅ **Serviços gerenciados**
 
-📚 **Guias Detalhados:**
-- [Deploy Rápido (15 min)](DEPLOY_RAPIDO.md)
-- [Deploy na Nuvem](DEPLOY_CLOUD.md)
-- [Alternativas de Deploy](DEPLOY_ALTERNATIVAS.md)
+📚 **Documentação Adicional:**
+- [Setup Rápido](SETUP.md) - Instalação em nova máquina
+- [Configuração ESP32](CONFIGURACAO_ESP32.md) - Guia completo do hardware
+- [Protocolo ESP32](ESP32_PROTOCOL.md) - Especificações de comunicação
 
 ## 🔌 API Endpoints
 
@@ -298,10 +319,10 @@ sleep-help/
 │   ├── server.js                # Servidor principal
 │   ├── package.json             # Dependências do backend
 │   └── Dockerfile               # Container do backend
-├── codigos_arduino/             # Códigos para ESP32
-│   ├── ESP32_SPO2_RANDOM/       # Código com dados aleatórios
-│   ├── TRANSMISSOR_ESP32_V3/    # Código com sensor real
-│   └── RECEIVER_ESPNOW_V0/      # Código do receptor
+├── codigos_ESP32_finais/        # Códigos finais para ESP32
+│   ├── TRANSMISSOR_FINAL/       # Código do transmissor (com sensor)
+│   └── RECEIVER_FINAL/          # Código do receptor (ESP-NOW)
+├── espnow_funcionando/          # Códigos de referência ESP-NOW
 ├── public/                      # Arquivos estáticos
 ├── docker-compose.yml           # Configuração Docker
 ├── Dockerfile                   # Container do frontend
