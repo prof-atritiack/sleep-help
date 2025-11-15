@@ -3,9 +3,12 @@
 // 240x240, ST7789
 // tft_setup.h
 #define ST7789_DRIVER
+// #define ST7735_DRIVER
 
 #define TFT_WIDTH  240
 #define TFT_HEIGHT 240
+// #define TFT_WIDTH  128
+// #define TFT_HEIGHT 128
 
 #define TFT_RGB_ORDER TFT_BGR
 
