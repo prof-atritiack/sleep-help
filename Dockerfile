@@ -13,8 +13,8 @@ RUN npm ci
 # Copiar o código fonte
 COPY . .
 
-# Construir a aplicação para produção
-RUN npm run build
+# Construir a aplicação para produção usando npx (resolve permissões automaticamente)
+RUN npx react-scripts build
 
 # Usar nginx para servir os arquivos estáticos
 FROM nginx:alpine

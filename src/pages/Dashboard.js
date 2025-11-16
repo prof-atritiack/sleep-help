@@ -23,8 +23,9 @@ const Dashboard = () => {
       return;
     }
 
-    // Conectar ao backend
-    const newSocket = io('http://localhost:3001');
+    // Conectar ao backend (usa variável de ambiente ou localhost como fallback)
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+    const newSocket = io(apiUrl);
     setSocket(newSocket);
 
     // Eventos do WebSocket
@@ -67,7 +68,8 @@ const Dashboard = () => {
   // Função para buscar dados atuais
   const fetchCurrentData = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/current-data');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/api/current-data`);
       const data = await response.json();
       
       if (data.current) {
