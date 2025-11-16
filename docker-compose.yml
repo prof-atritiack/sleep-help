@@ -14,11 +14,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      # Variáveis do WhatsApp (configure no .env ou aqui)
-      - WHATSAPP_PHONE=${WHATSAPP_PHONE:-}
-      - WHATSAPP_API_KEY=${WHATSAPP_API_KEY:-}
-      - ALARM_THRESHOLD=${ALARM_THRESHOLD:-95}
-    # Permite passar variáveis do arquivo .env do host
+    # Carrega variáveis do arquivo .env (WHATSAPP_PHONE, WHATSAPP_API_KEY, ALARM_THRESHOLD)
     env_file:
       - ./backend/.env
     networks:

@@ -34,7 +34,7 @@ const WHATSAPP_PHONE = process.env.WHATSAPP_PHONE || '';
 const WHATSAPP_API_KEY = process.env.WHATSAPP_API_KEY || '';
 const ALARM_THRESHOLD = parseInt(process.env.ALARM_THRESHOLD || '95'); // SpO2 <= 95% gera alarme
 let lastAlarmSent = null; // Controla para não enviar múltiplos alarmes seguidos
-const ALARM_COOLDOWN = 60000; // 1 minuto entre alarmes (evita spam)
+const ALARM_COOLDOWN = 300000; // 5 minutos entre alarmes (evita spam e respeita limite da API: 50 msg/4h)
 
 // Dados de exemplo para demonstração
 const generateSampleData = () => {
