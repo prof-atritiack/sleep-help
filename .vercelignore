@@ -1,0 +1,31 @@
+# Backend - não precisa no deploy do frontend
+backend/
+
+# Dockerfiles - Vercel não precisa
+Dockerfile
+Dockerfile.dev
+docker-compose.yml
+docker-compose.dev.yml
+nginx.conf
+
+# Códigos ESP32
+codigos_ESP32_finais/
+espnow_funcionando/
+
+# Documentação
+*.md
+!README.md
+
+# Scripts de configuração
+*.ps1
+*.sh
+generate-qr.html
+
+# Arquivos de configuração do backend
+backend/criar-env.ps1
+backend/criar-env.sh
+backend/test-*.js
+
+# Render config (não usado no Vercel)
+render.yaml
+
