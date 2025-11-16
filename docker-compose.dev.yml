@@ -1,0 +1,56 @@
+services:
+  # Backend API - Modo Desenvolvimento com Hot Reload
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+      tags:
+        - sleep-help-backend:dev
+    ports:
+      - "3001:3001"
+    container_name: sleep-help-backend-dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+    # Carrega variáveis do arquivo .env
+    env_file:
+      - ./backend/.env
+    # Volumes para hot-reload - código local sincronizado com container
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - sleep-help-network
+    command: npm run dev
+
+  # Frontend React - Modo Desenvolvimento com Hot Reload
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      tags:
+        - sleep-help-frontend:dev
+    ports:
+      - "3000:3000"
+    container_name: sleep-help-frontend-dev
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001
+      - CHOKIDAR_USEPOLLING=true
+    # Volumes para hot-reload - código local sincronizado com container
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - /app/node_modules
+    networks:
+      - sleep-help-network
+    stdin_open: true
+    tty: true
+
+networks:
+  sleep-help-network:
+    driver: bridge
+

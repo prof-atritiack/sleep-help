@@ -1,0 +1,39 @@
+services:
+  # Backend Service
+  - type: web
+    name: sleep-help-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: WHATSAPP_PHONE
+        sync: false
+      - key: WHATSAPP_API_KEY
+        sync: false
+      - key: ALARM_THRESHOLD
+        value: 95
+
+  # Frontend Service
+  - type: web
+    name: sleep-help-frontend
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+    envVars:
+      - key: REACT_APP_API_URL
+        fromService:
+          name: sleep-help-backend
+          type: web
+          property: host
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
