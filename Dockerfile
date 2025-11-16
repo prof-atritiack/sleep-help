@@ -1,5 +1,5 @@
-# Use a imagem oficial do Node.js como base
-FROM node:18-alpine
+# Use a imagem oficial do Node.js como base (não-alpine para evitar problemas de permissão)
+FROM node:18
 
 # Definir o diretório de trabalho
 WORKDIR /app
@@ -13,8 +13,8 @@ RUN npm ci
 # Copiar o código fonte
 COPY . .
 
-# Construir a aplicação para produção usando npx (resolve permissões automaticamente)
-RUN npx react-scripts build
+# Construir a aplicação para produção
+RUN npm run build
 
 # Usar nginx para servir os arquivos estáticos
 FROM nginx:alpine
